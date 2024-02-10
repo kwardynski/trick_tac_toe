@@ -50,8 +50,7 @@ defmodule TrickTacToe.MixProject do
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
-
-      {:games_engine, "~> 0.2.1"}
+      {:games_engine, git: "https://github.com/kwardynski/games_engine", branch: "main"}
     ]
   end
 
