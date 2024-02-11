@@ -21,7 +21,8 @@ defmodule TrickTacToe.Game.PlayerTest do
                name: "Guy Laroche",
                number: 1,
                marker: :x,
-               wins: 0
+               wins: 0,
+               losses: 0
              } = Player.new("Guy Laroche", 1)
     end
   end
