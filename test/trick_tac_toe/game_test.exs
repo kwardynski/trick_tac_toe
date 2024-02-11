@@ -41,7 +41,7 @@ defmodule TrickTacToe.GameTest do
       end)
     end
 
-    test "returns :player_two_win if row of y's found" do
+    test "returns :player_two_win if row of o's found" do
       paths = [
         [2, 5, 8],
         [0, 1, 2],
