@@ -6,6 +6,17 @@ defmodule TrickTacToe.Game.Board do
   @default_tile_attributes %{marker: nil}
   @markers [:x, :o]
 
+  @win_paths [
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 4, 8],
+    [2, 4, 6]
+  ]
+
   @doc """
   Creates an empty board for a new Trick Tac Toe game
   """
@@ -37,4 +48,41 @@ defmodule TrickTacToe.Game.Board do
       do: :ok,
       else: {:error, "marker present in tile"}
   end
+
+  @doc """
+  Checks if end-game state has been reached on the board
+  """
+  def check_end_game_conditions(%Grid{} = board) do
+    %{tiles: tiles} = board
+
+    win_result = check_for_winner(@win_paths, tiles)
+    board_full? = check_board_full(tiles)
+
+    cond do
+      win_result in [:player_one_win, :player_two_win] -> {:ok, win_result}
+      board_full? -> {:ok, :draw}
+      true -> {:ok, :continue}
+    end
+  end
+
+  defp check_for_winner([], _tiles), do: :no_winner
+
+  defp check_for_winner([path | paths], tiles) do
+    path_values =
+      Enum.map(path, fn ind ->
+        tiles
+        |> Map.get(ind)
+        |> Map.get(:attributes)
+        |> Map.get(:marker)
+      end)
+
+    cond do
+      Enum.all?(path_values, &(&1 == :x)) -> :player_one_win
+      Enum.all?(path_values, &(&1 == :o)) -> :player_two_win
+      true -> check_for_winner(paths, tiles)
+    end
+  end
+
+  defp check_board_full(tiles),
+    do: Enum.all?(tiles, fn {_ind, %{attributes: %{marker: marker}}} -> !is_nil(marker) end)
 end
