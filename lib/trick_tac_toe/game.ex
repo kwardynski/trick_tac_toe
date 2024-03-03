@@ -1,5 +1,4 @@
 defmodule TrickTacToe.Game do
-  alias GamesEngine.Grid
   alias TrickTacToe.Game.Board
   alias TrickTacToe.Game.Player
   alias TrickTacToe.Game.States
@@ -54,9 +53,11 @@ defmodule TrickTacToe.Game do
   @doc """
   Checks if end-game state has been reached on the board
   """
-  def check_end_game_conditions(%Grid{} = board) do
-    win_result = check_for_winner(paths(), board.tiles)
-    board_full? = check_board_full(board.tiles)
+  def check_end_game_conditions(%__MODULE__{} = game) do
+    %{board: %{tiles: tiles}} = game
+
+    win_result = check_for_winner(paths(), tiles)
+    board_full? = check_board_full(tiles)
 
     cond do
       win_result in [:player_one_win, :player_two_win] -> win_result
