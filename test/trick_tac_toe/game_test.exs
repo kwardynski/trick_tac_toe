@@ -3,13 +3,12 @@ defmodule TrickTacToe.GameTest do
 
   alias TrickTacToe.Game
   alias TrickTacToe.Game.Board
-  alias TrickTacToe.Game.Player
+
+  setup do
+    [game: Game.new()]
+  end
 
   describe "transition_state/2" do
-    setup do
-      [game: Game.new()]
-    end
-
     test ":player_one_turn -> :player_two_turn", %{game: game} do
       assert %Game{state: :player_two_turn} = Game.transition_state(game, :continue)
     end
@@ -42,17 +41,20 @@ defmodule TrickTacToe.GameTest do
   end
 
   describe "place_marker/3" do
-    test "has a chance of placing the other player's marker" do
-      player_1 = %Player{number: 1, marker: :x}
-      board = Board.initialize_board()
-      test_ind = 1
+    test "successfully places a marker", %{game: game} do
+      %Game{board: board} = Game.place_marker(game, 0)
+      %{tiles: %{0 => %{attributes: %{marker: marker}}}} = board
+      refute is_nil(marker)
+    end
 
+    test "has a chance of placing the other player's marker", %{game: game} do
       markers =
         for _ <- 1..100 do
-          player_1
-          |> Game.place_player_marker(test_ind, board)
+          game
+          |> Game.place_marker(0)
+          |> Map.get(:board)
           |> Map.get(:tiles)
-          |> Map.get(test_ind)
+          |> Map.get(0)
           |> Map.get(:attributes)
           |> Map.get(:marker)
         end
@@ -62,7 +64,7 @@ defmodule TrickTacToe.GameTest do
   end
 
   describe "check_end_game_conditions/1" do
-    test "returns :player_one_win if row of x's found" do
+    test "returns :player_one_win if row of x's found", %{game: game} do
       paths = [
         [0, 3, 6],
         [3, 4, 5],
@@ -70,14 +72,13 @@ defmodule TrickTacToe.GameTest do
       ]
 
       Enum.each(paths, fn path ->
-        assert :player_one_win ==
-                 Board.initialize_board()
-                 |> fill_tiles(path, :x)
-                 |> Game.check_end_game_conditions()
+        filled_board = populate_board(path, [])
+        game = %{game | board: filled_board}
+        assert :player_one_win == Game.check_end_game_conditions(game)
       end)
     end
 
-    test "returns :player_two_win if row of o's found" do
+    test "returns :player_two_win if row of o's found", %{game: game} do
       paths = [
         [2, 5, 8],
         [0, 1, 2],
@@ -85,34 +86,35 @@ defmodule TrickTacToe.GameTest do
       ]
 
       Enum.each(paths, fn path ->
-        assert :player_two_win ==
-                 Board.initialize_board()
-                 |> fill_tiles(path, :o)
-                 |> Game.check_end_game_conditions()
+        filled_board = populate_board([], path)
+        game = %{game | board: filled_board}
+        assert :player_two_win == Game.check_end_game_conditions(game)
       end)
     end
 
-    test "returns :draw if board is full but no complete row found" do
+    test "returns :draw if board is full but no complete row found", %{game: game} do
       x_tiles = [0, 2, 4, 5, 7]
       o_tiles = [1, 3, 6, 8]
 
-      assert :draw =
-               Board.initialize_board()
-               |> fill_tiles(x_tiles, :x)
-               |> fill_tiles(o_tiles, :o)
-               |> Game.check_end_game_conditions()
+      filled_board = populate_board(x_tiles, o_tiles)
+      game = %{game | board: filled_board}
+      assert :draw == Game.check_end_game_conditions(game)
     end
 
-    test "returns :continue if board is not full and no row found" do
+    test "returns :continue if board is not full and no row found", %{game: game} do
       x_tiles = [0, 2, 4, 5]
       o_tiles = [1, 3, 6]
 
-      assert :continue =
-               Board.initialize_board()
-               |> fill_tiles(x_tiles, :x)
-               |> fill_tiles(o_tiles, :o)
-               |> Game.check_end_game_conditions()
+      filled_board = populate_board(x_tiles, o_tiles)
+      game = %{game | board: filled_board}
+      assert :continue == Game.check_end_game_conditions(game)
     end
+  end
+
+  defp populate_board(x_tiles, o_tiles) do
+    Board.initialize_board()
+    |> fill_tiles(x_tiles, :x)
+    |> fill_tiles(o_tiles, :o)
   end
 
   defp fill_tiles(board, tiles, marker) do
