@@ -2,8 +2,33 @@ defmodule TrickTacToe.Game do
   alias GamesEngine.Grid
   alias TrickTacToe.Game.Board
   alias TrickTacToe.Game.Player
+  alias TrickTacToe.Game.States
+
+  defstruct [:board, :players, :state]
 
   @chance_of_other_marker 0.20
+
+  @doc """
+  Initializes a new game
+  """
+  def new() do
+    %__MODULE__{
+      players: %{
+        player_one: Player.new("Player One", 1),
+        player_two: Player.new("Player Two", 2)
+      },
+      board: Board.initialize_board(),
+      state: States.initial_state()
+    }
+  end
+
+  @doc """
+  Handles the transition of a game's state
+  """
+  def transition_state(game, event) do
+    next_state = States.transition(game.state, event)
+    %{game | state: next_state}
+  end
 
   @doc """
   Places a marker on the board for a player

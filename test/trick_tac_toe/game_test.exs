@@ -5,6 +5,42 @@ defmodule TrickTacToe.GameTest do
   alias TrickTacToe.Game.Board
   alias TrickTacToe.Game.Player
 
+  describe "transition_state/2" do
+    setup do
+      [game: Game.new()]
+    end
+
+    test ":player_one_turn -> :player_two_turn", %{game: game} do
+      assert %Game{state: :player_two_turn} = Game.transition_state(game, :continue)
+    end
+
+    test ":player_two_turn -> :player_two_turn", %{game: game} do
+      assert %Game{state: :player_one_turn} =
+               game
+               |> set_state(:player_two_turn)
+               |> Game.transition_state(:continue)
+    end
+
+    test "transitions to :end_game", %{game: game} do
+      initial_states = [:player_one_turn, :player_two_turn]
+      end_game_transitions = [:draw, :player_one_win, :player_two_win]
+
+      for state <- initial_states, transition <- end_game_transitions do
+        assert %Game{state: :end_game} =
+                 game
+                 |> set_state(state)
+                 |> Game.transition_state(transition)
+      end
+    end
+
+    test "start new game", %{game: game} do
+      assert %Game{state: :player_one_turn} =
+               game
+               |> set_state(:end_game)
+               |> Game.transition_state(:new_game)
+    end
+  end
+
   describe "place_marker/3" do
     test "has a chance of placing the other player's marker" do
       player_1 = %Player{number: 1, marker: :x}
@@ -83,5 +119,9 @@ defmodule TrickTacToe.GameTest do
     Enum.reduce(tiles, board, fn ind, board ->
       Board.place_marker(board, ind, marker)
     end)
+  end
+
+  defp set_state(game, state) do
+    %{game | state: state}
   end
 end
