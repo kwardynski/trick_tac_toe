@@ -37,20 +37,27 @@ defmodule TrickTacToe.Game do
 
   @impl true
   def handle_call({:place_marker, ind}, _from, game) do
-    marker = determine_marker(game)
-
     with(
+      :ok <- verify_player_turn(game),
+      {:ok, marker} <- determine_marker(game),
       %Grid{} = board <- Board.place_marker(game.board, ind, marker),
       {:ok, result} <- Board.check_end_game_conditions(board),
       {:ok, next_state} <- States.transition(game.state, result)
     ) do
       game = %{game | board: board, state: next_state}
-      {:reply, :ok, game}
+      {:reply, next_state, game}
+    else
+      error -> {:reply, error, game}
     end
   end
 
-  defp determine_marker(%{state: :player_one_turn}), do: maybe_randomize_marker(:x)
-  defp determine_marker(%{state: :player_two_turn}), do: maybe_randomize_marker(:o)
+  defp verify_player_turn(%{state: state}) when state in [:player_one_turn, :player_two_turn],
+    do: :ok
+
+  defp verify_player_turn(_game), do: {:error, :invalid_state}
+
+  defp determine_marker(%{state: :player_one_turn}), do: {:ok, maybe_randomize_marker(:x)}
+  defp determine_marker(%{state: :player_two_turn}), do: {:ok, maybe_randomize_marker(:o)}
 
   defp maybe_randomize_marker(marker) do
     if :rand.uniform() <= @chance_of_other_marker,
