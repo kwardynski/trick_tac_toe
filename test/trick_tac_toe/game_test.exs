@@ -3,7 +3,6 @@ defmodule TrickTacToe.GameTest do
 
   alias TrickTacToe.Game
   alias TrickTacToe.Game.Board
-  alias TrickTacToe.Game.Player
 
   describe "transition_state/2" do
     setup do
@@ -42,17 +41,24 @@ defmodule TrickTacToe.GameTest do
   end
 
   describe "place_marker/3" do
-    test "has a chance of placing the other player's marker" do
-      player_1 = %Player{number: 1, marker: :x}
-      board = Board.initialize_board()
-      test_ind = 1
+    setup do
+      [game: Game.new()]
+    end
 
+    test "successfully places a marker", %{game: game} do
+      %Game{board: board} = Game.place_marker(game, 0)
+      %{tiles: %{0 => %{attributes: %{marker: marker}}}} = board
+      refute is_nil(marker)
+    end
+
+    test "has a chance of placing the other player's marker", %{game: game} do
       markers =
         for _ <- 1..100 do
-          player_1
-          |> Game.place_player_marker(test_ind, board)
+          game
+          |> Game.place_marker(0)
+          |> Map.get(:board)
           |> Map.get(:tiles)
-          |> Map.get(test_ind)
+          |> Map.get(0)
           |> Map.get(:attributes)
           |> Map.get(:marker)
         end

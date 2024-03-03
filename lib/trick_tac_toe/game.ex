@@ -33,15 +33,19 @@ defmodule TrickTacToe.Game do
   @doc """
   Places a marker on the board for a player
   """
-  def place_player_marker(%Player{} = player, ind, %Grid{} = board) do
-    marker = maybe_randomize_marker(player)
-    Board.place_marker(board, ind, marker)
+  def place_marker(%__MODULE__{} = game, ind) do
+    marker = determine_marker(game)
+    board = Board.place_marker(game.board, ind, marker)
+    %{game | board: board}
   end
 
-  defp maybe_randomize_marker(player) do
+  defp determine_marker(%{state: :player_one_turn}), do: maybe_randomize_marker(:x)
+  defp determine_marker(%{state: :player_two_turn}), do: maybe_randomize_marker(:o)
+
+  defp maybe_randomize_marker(marker) do
     if :rand.uniform() <= @chance_of_other_marker,
-      do: other_marker(player.marker),
-      else: player.marker
+      do: other_marker(marker),
+      else: marker
   end
 
   defp other_marker(:o), do: :x
