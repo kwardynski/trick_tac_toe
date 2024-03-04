@@ -4,8 +4,7 @@ defmodule TrickTacToe.Game.Player do
     :name,
     :number,
     :marker,
-    :wins,
-    :losses
+    :wins
   ]
 
   @doc """
@@ -20,8 +19,7 @@ defmodule TrickTacToe.Game.Player do
         name: name,
         number: number,
         marker: marker_from_number(number),
-        wins: 0,
-        losses: 0
+        wins: 0
       }
     end
   end
@@ -35,4 +33,8 @@ defmodule TrickTacToe.Game.Player do
 
   defp marker_from_number(1), do: :x
   defp marker_from_number(2), do: :o
+
+  def add_win(%__MODULE__{} = player) do
+    %{player | wins: player.wins + 1}
+  end
 end

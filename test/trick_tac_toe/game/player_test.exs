@@ -21,9 +21,17 @@ defmodule TrickTacToe.Game.PlayerTest do
                name: "Guy Laroche",
                number: 1,
                marker: :x,
-               wins: 0,
-               losses: 0
+               wins: 0
              } = Player.new("Guy Laroche", 1)
+    end
+  end
+
+  describe "add_win/1" do
+    test "increments win attribute by 1" do
+      assert %Player{wins: 1} =
+               "Guy Laroche"
+               |> Player.new(2)
+               |> Player.add_win()
     end
   end
 end
