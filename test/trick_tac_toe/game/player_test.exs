@@ -5,15 +5,15 @@ defmodule TrickTacToe.Game.PlayerTest do
 
   describe "new/2" do
     test "returns error if name is not a string" do
-      assert {:error, "name must be a string"} = Player.new(:atom, 2)
+      assert {:error, :name_must_be_string} = Player.new(:atom, 2)
     end
 
     test "returns error if name is empty string" do
-      assert {:error, "name cannot be empty"} = Player.new("", 1)
+      assert {:error, :name_cannot_be_empty} = Player.new("", 1)
     end
 
     test "returns error if given invalid player number" do
-      assert {:error, "invalid player number"} = Player.new("Guy Laroche", 12)
+      assert {:error, :invalid_player_number} = Player.new("Guy Laroche", 12)
     end
 
     test "creates a new player struct when given valid input" do
