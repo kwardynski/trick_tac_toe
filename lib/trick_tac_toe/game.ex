@@ -7,16 +7,14 @@ defmodule TrickTacToe.Game do
   alias TrickTacToe.Game.Player
   alias TrickTacToe.Game.States
 
-  defstruct [:board, :players, :state]
+  defstruct [:board, :player_one, :player_two, :state]
 
   @chance_of_other_marker 0.20
 
   def new() do
     %__MODULE__{
-      players: %{
-        player_one: Player.new("Player One", 1),
-        player_two: Player.new("Player Two", 2)
-      },
+      player_one: Player.new("Player One", 1),
+      player_two: Player.new("Player Two", 2),
       board: Board.initialize_board(),
       state: States.initial_state()
     }

@@ -39,7 +39,7 @@ defmodule TrickTacToe.GameTest do
       {:reply, _state, updated_game} = Game.handle_call({:place_marker, 0}, [], game)
       {:reply, error, error_game} = Game.handle_call({:place_marker, 0}, [], updated_game)
 
-      assert error == {:error, "marker present in tile"}
+      assert error == {:error, :tile_occupied}
       assert error_game == updated_game
     end
 
