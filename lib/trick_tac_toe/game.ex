@@ -42,7 +42,12 @@ defmodule TrickTacToe.Game do
       {:ok, result} <- Board.check_end_game_conditions(board),
       {:ok, next_state} <- States.transition(game.state, result)
     ) do
-      game = %{game | board: board, state: next_state}
+      game =
+        game
+        |> update_board(board)
+        |> update_state(next_state)
+        |> maybe_handle_win_condition(next_state)
+
       {:reply, next_state, game}
     else
       error -> {:reply, error, game}
@@ -65,4 +70,19 @@ defmodule TrickTacToe.Game do
 
   defp other_marker(:o), do: :x
   defp other_marker(:x), do: :o
+
+  defp maybe_handle_win_condition(game, :player_one_win) do
+    player_one = Player.add_win(game.player_one)
+    %{game | player_one: player_one}
+  end
+
+  defp maybe_handle_win_condition(game, :player_two_win) do
+    player_two = Player.add_win(game.player_two)
+    %{game | player_two: player_two}
+  end
+
+  defp maybe_handle_win_condition(game, _), do: game
+
+  defp update_board(game, board), do: %{game | board: board}
+  defp update_state(game, state), do: %{game | state: state}
 end

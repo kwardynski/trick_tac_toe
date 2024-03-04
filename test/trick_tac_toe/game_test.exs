@@ -2,6 +2,8 @@ defmodule TrickTacToe.GameTest do
   use ExUnit.Case, async: true
 
   alias TrickTacToe.Game
+  alias TrickTacToe.Game.Board
+  alias TrickTacToe.Game.Player
 
   setup do
     [game: Game.new()]
@@ -35,6 +37,21 @@ defmodule TrickTacToe.GameTest do
       assert {:reply, :player_one_turn, _game} = Game.handle_call({:place_marker, 1}, [], game)
     end
 
+    test "successfully updates player win count if win encountered", %{game: game} do
+      x_tiles = [0, 3, 6]
+      board = populate_board(game.board, x_tiles, [])
+      game = %{game | board: board}
+
+      {:reply, :player_one_win, game} = Game.handle_call({:place_marker, 1}, [], game)
+
+      %Game{
+        state: :player_one_win,
+        player_one: %Player{
+          wins: 1
+        }
+      } = game
+    end
+
     test "returns error if attempting to place marker on occupied", %{game: game} do
       {:reply, _state, updated_game} = Game.handle_call({:place_marker, 0}, [], game)
       {:reply, error, error_game} = Game.handle_call({:place_marker, 0}, [], updated_game)
@@ -56,5 +73,17 @@ defmodule TrickTacToe.GameTest do
       assert error == {:error, :invalid_state}
       assert game_filled_board == error_game
     end
+  end
+
+  defp populate_board(board, x_tiles, o_tiles) do
+    board
+    |> fill_tiles(x_tiles, :x)
+    |> fill_tiles(o_tiles, :o)
+  end
+
+  defp fill_tiles(board, tiles, marker) do
+    Enum.reduce(tiles, board, fn ind, board ->
+      Board.place_marker(board, ind, marker)
+    end)
   end
 end
