@@ -9,7 +9,13 @@ defmodule TrickTacToe.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [
+        coveralls: :test,
+        "coveralls.html": :test,
+        "ci.test": :test
+      ]
     ]
   end
 
@@ -50,7 +56,10 @@ defmodule TrickTacToe.MixProject do
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
-      {:games_engine, git: "https://github.com/kwardynski/games_engine", branch: "main"}
+      {:games_engine, git: "https://github.com/kwardynski/games_engine", branch: "main"},
+
+      #
+      {:excoveralls, "~> 0.18", only: :test}
     ]
   end
 
@@ -68,7 +77,8 @@ defmodule TrickTacToe.MixProject do
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
       "assets.build": ["tailwind default", "esbuild default"],
-      "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"]
+      "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"],
+      "ci.test": ["ecto.create --quiet", "ecto.migrate --quiet", "coveralls.html"]
     ]
   end
 end
