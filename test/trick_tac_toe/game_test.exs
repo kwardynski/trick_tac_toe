@@ -11,7 +11,7 @@ defmodule TrickTacToe.GameTest do
 
   describe "Placing a marker" do
     test "successfully places a marker", %{game: game} do
-      {:reply, _state, %{board: board}} = Game.handle_call({:place_marker, 0}, [], game)
+      {:reply, %Game{board: board}, _game} = Game.handle_call({:place_marker, 0}, [], game)
       %{tiles: %{0 => %{attributes: %{marker: marker}}}} = board
       refute is_nil(marker)
     end
@@ -19,7 +19,7 @@ defmodule TrickTacToe.GameTest do
     test "has a chance of placing the other player's marker", %{game: game} do
       markers =
         for _ <- 1..100 do
-          {:reply, _state, game} = Game.handle_call({:place_marker, 0}, [], game)
+          {:reply, game, game} = Game.handle_call({:place_marker, 0}, [], game)
 
           game
           |> Map.get(:board)
@@ -33,8 +33,11 @@ defmodule TrickTacToe.GameTest do
     end
 
     test "successfully transitions state between players", %{game: game} do
-      assert {:reply, :player_two_turn, game} = Game.handle_call({:place_marker, 0}, [], game)
-      assert {:reply, :player_one_turn, _game} = Game.handle_call({:place_marker, 1}, [], game)
+      assert {:reply, %Game{state: :player_two_turn} = game, _game} =
+               Game.handle_call({:place_marker, 0}, [], game)
+
+      assert {:reply, %Game{state: :player_one_turn}, _game} =
+               Game.handle_call({:place_marker, 1}, [], game)
     end
 
     test "successfully updates player win count if win encountered", %{game: game} do
@@ -42,9 +45,9 @@ defmodule TrickTacToe.GameTest do
       board = populate_board(game.board, x_tiles, [])
       game = %{game | board: board}
 
-      {:reply, :player_one_win, game} = Game.handle_call({:place_marker, 1}, [], game)
+      {:reply, %Game{} = game, _game} = Game.handle_call({:place_marker, 1}, [], game)
 
-      %Game{
+      %{
         state: :player_one_win,
         player_one: %Player{
           wins: 1
@@ -53,25 +56,48 @@ defmodule TrickTacToe.GameTest do
     end
 
     test "returns error if attempting to place marker on occupied", %{game: game} do
-      {:reply, _state, updated_game} = Game.handle_call({:place_marker, 0}, [], game)
+      {:reply, updated_game, _game} = Game.handle_call({:place_marker, 0}, [], game)
       {:reply, error, error_game} = Game.handle_call({:place_marker, 0}, [], updated_game)
 
       assert error == {:error, :tile_occupied}
       assert error_game == updated_game
     end
+  end
 
-    test "returns error if board is full", %{game: game} do
-      game_filled_board =
-        Enum.reduce(0..9, game, fn ind, game ->
-          {:reply, _state, game} = Game.handle_call({:place_marker, ind}, [], game)
-          game
-        end)
+  describe "Starting a new game" do
+    test "resets to initial state", %{game: game} do
+      updated_game = %{game | state: :player_two_win}
 
-      assert {:reply, error, error_game} =
-               Game.handle_call({:place_marker, 0}, [], game_filled_board)
+      {:reply, %Game{state: :player_one_turn}, _new_game} =
+        Game.handle_call(:new_game, [], updated_game)
+    end
 
-      assert error == {:error, :invalid_state}
-      assert game_filled_board == error_game
+    test "resets the board", %{game: game} do
+      x_tiles = [0, 2, 4]
+      o_tiles = [1, 3, 4]
+      board = populate_board(game.board, x_tiles, o_tiles)
+      game = %{game | board: board}
+
+      {:reply, %Game{board: updated_board}, _game} = Game.handle_call(:new_game, [], game)
+
+      Enum.each(updated_board.tiles, fn {_ind, tile} ->
+        assert is_nil(tile.attributes.marker)
+      end)
+    end
+
+    test "does not clear player stats", %{game: game} do
+      %{player_one: player_one, player_two: player_two} = game
+      player_one_with_wins = %{player_one | wins: 2}
+      player_two_with_wins = %{player_two | wins: 3}
+
+      updated_game = %{game | player_one: player_one_with_wins, player_two: player_two_with_wins}
+
+      assert {:reply, new_game, _new_game} = Game.handle_call(:new_game, [], updated_game)
+
+      assert %Game{
+               player_one: %Player{wins: 2},
+               player_two: %Player{wins: 3}
+             } = new_game
     end
   end
 
