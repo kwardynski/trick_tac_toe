@@ -1,9 +1,5 @@
 defmodule TrickTacToeWeb.TrickTacToeLive do
-  # add phx-click attribute to grid item
-  # use phx-value-<value_name>="value" to pass ind to handle_event
-
   use TrickTacToeWeb, :live_view
-
   alias TrickTacToe.Game
 
   def mount(_params, _session, socket), do: {:ok, assign(socket, game: Game.new())}
