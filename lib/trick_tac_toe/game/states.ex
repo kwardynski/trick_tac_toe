@@ -1,4 +1,6 @@
 defmodule TrickTacToe.Game.States do
+  @moduledoc false
+
   def initial_state, do: :player_one_turn
 
   def transition(:new_game), do: initial_state()

@@ -1,4 +1,6 @@
 defmodule TrickTacToe.Game.Player do
+  @moduledoc false
+
   @enforce_keys []
   defstruct [
     :name,
