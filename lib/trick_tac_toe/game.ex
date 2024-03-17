@@ -1,4 +1,6 @@
 defmodule TrickTacToe.Game do
+  @moduledoc false
+
   alias GamesEngine.Grid
 
   alias TrickTacToe.Game.Board
@@ -9,7 +11,7 @@ defmodule TrickTacToe.Game do
 
   @chance_of_other_marker 0.20
 
-  def new() do
+  def new do
     %__MODULE__{
       player_one: Player.new("Player One", 1),
       player_two: Player.new("Player Two", 2),

@@ -1,4 +1,6 @@
 defmodule TrickTacToe.Game.Board do
+  @moduledoc false
+
   alias GamesEngine.Grid
   alias GamesEngine.Validations.GridValidations
 
@@ -20,7 +22,7 @@ defmodule TrickTacToe.Game.Board do
   @doc """
   Creates an empty board for a new Trick Tac Toe game
   """
-  def initialize_board() do
+  def initialize_board do
     board = Grid.new(@board_size, @board_size)
     Grid.populate(board, @default_tile_attributes)
   end

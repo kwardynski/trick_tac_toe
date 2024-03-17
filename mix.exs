@@ -59,6 +59,7 @@ defmodule TrickTacToe.MixProject do
       {:games_engine, git: "https://github.com/kwardynski/games_engine", branch: "main"},
 
       #
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:excoveralls, "~> 0.18", only: :test}
     ]
   end
@@ -78,7 +79,11 @@ defmodule TrickTacToe.MixProject do
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
       "assets.build": ["tailwind default", "esbuild default"],
       "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"],
-      "ci.test": ["ecto.create --quiet", "ecto.migrate --quiet", "coveralls.html"]
+      "ci.test": ["ecto.create --quiet", "ecto.migrate --quiet", "coveralls.html"],
+      "ci.checks": [
+        "format --check-formatted",
+        "credo --strict --verbose"
+      ]
     ]
   end
 end
