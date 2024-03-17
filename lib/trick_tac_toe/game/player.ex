@@ -4,8 +4,7 @@ defmodule TrickTacToe.Game.Player do
     :name,
     :number,
     :marker,
-    :wins,
-    :losses
+    :wins
   ]
 
   @doc """
@@ -20,19 +19,22 @@ defmodule TrickTacToe.Game.Player do
         name: name,
         number: number,
         marker: marker_from_number(number),
-        wins: 0,
-        losses: 0
+        wins: 0
       }
     end
   end
 
-  defp validate_name(name) when not is_binary(name), do: {:error, "name must be a string"}
-  defp validate_name(name) when byte_size(name) == 0, do: {:error, "name cannot be empty"}
+  defp validate_name(name) when not is_binary(name), do: {:error, :name_must_be_string}
+  defp validate_name(name) when byte_size(name) == 0, do: {:error, :name_cannot_be_empty}
   defp validate_name(_name), do: :ok
 
-  defp validate_number(number) when number not in [1, 2], do: {:error, "invalid player number"}
+  defp validate_number(number) when number not in [1, 2], do: {:error, :invalid_player_number}
   defp validate_number(_number), do: :ok
 
   defp marker_from_number(1), do: :x
   defp marker_from_number(2), do: :o
+
+  def add_win(%__MODULE__{} = player) do
+    %{player | wins: player.wins + 1}
+  end
 end

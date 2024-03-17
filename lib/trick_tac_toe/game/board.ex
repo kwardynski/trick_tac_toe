@@ -39,14 +39,14 @@ defmodule TrickTacToe.Game.Board do
   end
 
   defp validate_marker(marker) when marker in @markers, do: :ok
-  defp validate_marker(_), do: {:error, "invalid marker"}
+  defp validate_marker(_), do: {:error, :invalid_marker}
 
   defp validate_tile_empty(tiles, ind) do
     %{^ind => %{attributes: %{marker: marker}}} = tiles
 
     if is_nil(marker),
       do: :ok,
-      else: {:error, "marker present in tile"}
+      else: {:error, :tile_occupied}
   end
 
   @doc """

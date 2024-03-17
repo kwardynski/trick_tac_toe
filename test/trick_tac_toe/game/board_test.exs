@@ -15,11 +15,11 @@ defmodule TrickTacToe.Game.BoardTest do
     end
 
     test "returns error if invalid marker supplied", %{board: board} do
-      assert {:error, "invalid marker"} == Board.place_marker(board, 3, :invalid)
+      assert {:error, :invalid_marker} == Board.place_marker(board, 3, :invalid)
     end
 
     test "returns error if tile already has a marker in it", %{board: board} do
-      assert {:error, "marker present in tile"} =
+      assert {:error, :tile_occupied} =
                board
                |> Board.place_marker(3, :x)
                |> Board.place_marker(3, :x)
