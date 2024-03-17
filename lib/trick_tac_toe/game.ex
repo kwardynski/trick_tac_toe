@@ -1,6 +1,4 @@
 defmodule TrickTacToe.Game do
-  use GenServer
-
   alias GamesEngine.Grid
 
   alias TrickTacToe.Game.Board
@@ -20,21 +18,7 @@ defmodule TrickTacToe.Game do
     }
   end
 
-  def start_link(:ok) do
-    GenServer.start_link(__MODULE__, :ok)
-  end
-
-  def place_marker(pid, ind) do
-    GenServer.call(pid, {:place_marker, ind})
-  end
-
-  @impl true
-  def init(:ok) do
-    {:ok, new()}
-  end
-
-  @impl true
-  def handle_call({:place_marker, ind}, _from, game) do
+  def place_marker(game, ind) do
     with(
       :ok <- verify_player_turn(game),
       {:ok, marker} <- determine_marker(game),
@@ -48,20 +32,19 @@ defmodule TrickTacToe.Game do
         |> update_state(next_state)
         |> maybe_handle_win_condition(next_state)
 
-      {:reply, game, game}
+      {:ok, game}
     else
-      error -> {:reply, error, game}
+      error -> {error, game}
     end
   end
 
-  @impl true
-  def handle_call(:new_game, _from, game) do
+  def reset_game(game) do
     game =
       game
       |> reset_board()
       |> reset_state()
 
-    {:reply, game, game}
+    {:ok, game}
   end
 
   defp verify_player_turn(%{state: state}) when state in [:player_one_turn, :player_two_turn],

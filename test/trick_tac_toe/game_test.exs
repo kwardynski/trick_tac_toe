@@ -9,9 +9,9 @@ defmodule TrickTacToe.GameTest do
     [game: Game.new()]
   end
 
-  describe "Placing a marker" do
+  describe "place_marker/2" do
     test "successfully places a marker", %{game: game} do
-      {:reply, %Game{board: board}, _game} = Game.handle_call({:place_marker, 0}, [], game)
+      {:ok, %Game{board: board}} = Game.place_marker(game, 0)
       %{tiles: %{0 => %{attributes: %{marker: marker}}}} = board
       refute is_nil(marker)
     end
@@ -19,7 +19,7 @@ defmodule TrickTacToe.GameTest do
     test "has a chance of placing the other player's marker", %{game: game} do
       markers =
         for _ <- 1..100 do
-          {:reply, game, game} = Game.handle_call({:place_marker, 0}, [], game)
+          {:ok, %Game{} = game} = Game.place_marker(game, 0)
 
           game
           |> Map.get(:board)
@@ -33,11 +33,8 @@ defmodule TrickTacToe.GameTest do
     end
 
     test "successfully transitions state between players", %{game: game} do
-      assert {:reply, %Game{state: :player_two_turn} = game, _game} =
-               Game.handle_call({:place_marker, 0}, [], game)
-
-      assert {:reply, %Game{state: :player_one_turn}, _game} =
-               Game.handle_call({:place_marker, 1}, [], game)
+      assert {:ok, %Game{state: :player_two_turn} = game} = Game.place_marker(game, 0)
+      assert {:ok, %Game{state: :player_one_turn}} = Game.place_marker(game, 1)
     end
 
     test "successfully updates player win count if win encountered", %{game: game} do
@@ -45,7 +42,7 @@ defmodule TrickTacToe.GameTest do
       board = populate_board(game.board, x_tiles, [])
       game = %{game | board: board}
 
-      {:reply, %Game{} = game, _game} = Game.handle_call({:place_marker, 1}, [], game)
+      {:ok, %Game{} = game} = Game.place_marker(game, 1)
 
       %{
         state: :player_one_win,
@@ -56,20 +53,15 @@ defmodule TrickTacToe.GameTest do
     end
 
     test "returns error if attempting to place marker on occupied", %{game: game} do
-      {:reply, updated_game, _game} = Game.handle_call({:place_marker, 0}, [], game)
-      {:reply, error, error_game} = Game.handle_call({:place_marker, 0}, [], updated_game)
-
-      assert error == {:error, :tile_occupied}
-      assert error_game == updated_game
+      {:ok, updated_game} = Game.place_marker(game, 0)
+      assert {{:error, :tile_occupied}, ^updated_game} = Game.place_marker(updated_game, 0)
     end
   end
 
-  describe "Starting a new game" do
+  describe "reset_game/1" do
     test "resets to initial state", %{game: game} do
       updated_game = %{game | state: :player_two_win}
-
-      {:reply, %Game{state: :player_one_turn}, _new_game} =
-        Game.handle_call(:new_game, [], updated_game)
+      assert {:ok, %Game{state: :player_one_turn}} = Game.reset_game(updated_game)
     end
 
     test "resets the board", %{game: game} do
@@ -78,7 +70,7 @@ defmodule TrickTacToe.GameTest do
       board = populate_board(game.board, x_tiles, o_tiles)
       game = %{game | board: board}
 
-      {:reply, %Game{board: updated_board}, _game} = Game.handle_call(:new_game, [], game)
+      {:ok, %Game{board: updated_board}} = Game.reset_game(game)
 
       Enum.each(updated_board.tiles, fn {_ind, tile} ->
         assert is_nil(tile.attributes.marker)
@@ -92,7 +84,7 @@ defmodule TrickTacToe.GameTest do
 
       updated_game = %{game | player_one: player_one_with_wins, player_two: player_two_with_wins}
 
-      assert {:reply, new_game, _new_game} = Game.handle_call(:new_game, [], updated_game)
+      assert {:ok, new_game} = Game.reset_game(updated_game)
 
       assert %Game{
                player_one: %Player{wins: 2},
