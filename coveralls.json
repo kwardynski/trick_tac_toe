@@ -1,0 +1,15 @@
+{
+    "coverage_options:": {
+        "minimum_coverage": 75
+    },
+    "skip_files": [
+        "lib/trick_tac_toe.ex",
+        "lib/trick_tac_toe/mailer.ex",
+        "lib/trick_tac_toe/repo.ex",
+        "lib/trick_tac_toe_web/components/",
+        "lib/trick_tac_toe_web/endpoint.ex",
+        "lib/trick_tac_toe_web/gettext.ex",
+        "lib/trick_tac_toe_web/live/trick_tac_toe_live.ex",
+        "test/support/"
+    ]
+}
