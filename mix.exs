@@ -60,7 +60,8 @@ defmodule TrickTacToe.MixProject do
 
       #
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
-      {:excoveralls, "~> 0.18", only: :test}
+      {:excoveralls, "~> 0.18", only: :test},
+      {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false}
     ]
   end
 
@@ -82,7 +83,8 @@ defmodule TrickTacToe.MixProject do
       "ci.test": ["ecto.create --quiet", "ecto.migrate --quiet", "coveralls.html"],
       "ci.checks": [
         "format --check-formatted",
-        "credo --strict --verbose"
+        "credo --strict --verbose",
+        "sobelow --config"
       ]
     ]
   end
