@@ -1,0 +1,8 @@
+[
+    verbose: true,
+    threshold: "low",
+    ignore: [
+        "Config.CSP",
+        "Config.HTTPS"
+    ]
+]
